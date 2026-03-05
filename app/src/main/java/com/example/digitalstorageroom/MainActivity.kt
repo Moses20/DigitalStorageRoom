@@ -7,24 +7,30 @@ import androidx.activity.enableEdgeToEdge
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.Row
-import androidx.compose.foundation.layout.fillMaxSize
+import androidx.compose.foundation.layout.WindowInsets
+import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.padding
+import androidx.compose.foundation.layout.windowInsetsBottomHeight
 import androidx.compose.material3.Button
-import androidx.compose.material3.MaterialTheme
-import androidx.compose.material3.Surface
+import androidx.compose.material3.Scaffold
 import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.getValue
 import androidx.compose.runtime.mutableIntStateOf
+import androidx.compose.runtime.saveable.rememberSaveable
 import androidx.compose.runtime.setValue
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
+import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.text.style.TextAlign
 import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
+import androidx.navigation.compose.rememberNavController
+import com.example.digitalstorageroom.ui.AppNavHost
+import com.example.digitalstorageroom.ui.BottomAppBar
+import com.example.digitalstorageroom.ui.DestinationInit
 import com.example.digitalstorageroom.ui.theme.DigitalStorageRoomTheme
-import com.example.digitalstorageroom.item.view.ItemsView
 import kotlinx.coroutines.CoroutineScope
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.launch
@@ -43,16 +49,50 @@ class MainActivity : ComponentActivity() {
 
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
+
         enableEdgeToEdge()
         setContent {
             DigitalStorageRoomTheme {
-                Surface (
-                    modifier = Modifier.fillMaxSize(),
-                    color = MaterialTheme.colorScheme.background
-                ) {
+                //Used Surface before. But google seems to recommend Scaffold as it uses enableEdgeToEdge(), see https://stackoverflow.com/questions/78823208/scaffold-vs-surface
+
+                val navController = rememberNavController()
+                val startDestination = DestinationInit.START
+                var selectedDestination by rememberSaveable { mutableIntStateOf(startDestination.ordinal) }
+
+                Scaffold (
+                    //color = MaterialTheme.colorScheme.background
+                    containerColor = Color.Transparent,
+                    bottomBar = {
+                        BottomAppBar(
+                            selectDestination = { selectedDestination = it},
+                            selectedDestination = selectedDestination,
+                            navController = navController,
+                            modifier = Modifier
+                                .fillMaxWidth()
+                                //TODO: Check if this really is the way to move the nav bar from the bottom
+                                .windowInsetsBottomHeight(WindowInsets(bottom = 130.dp)),
+                        )
+                    }
+                ) { contentPadding ->
                     //Greeting(name = "Android", "From Klaus")
                     //VolumeScreen(smartTv)
-                    ItemsView()
+                    /*ItemsView(
+                        modifier = Modifier
+                            .fillMaxSize(),
+                        contentPadding = innerPadding
+                    )*/
+
+                    AppNavHost(navController, startDestination, modifier = Modifier.padding(contentPadding))
+
+                    /*LazyColumn(
+                        Modifier.fillMaxSize(),
+                        contentPadding = innerPadding
+                    ) {
+                        items(50) {
+                            // IMAGE CARDS
+                            Text("Hi")
+                        }
+                    }*/
                 }
             }
         }
