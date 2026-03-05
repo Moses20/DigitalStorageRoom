@@ -13,8 +13,8 @@ public val Material.Barcode: ImageVector
         }
         _Barcode = ImageVector.Builder(
             name = "Barcode",
-            defaultWidth = 24.dp,
-            defaultHeight = 24.dp,
+            defaultWidth = 48.dp,
+            defaultHeight = 48.dp,
             viewportWidth = 960f,
             viewportHeight = 960f
         ).apply {

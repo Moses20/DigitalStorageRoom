@@ -236,13 +236,13 @@ fun ListAnimatedItems(
 @Composable
 fun MyApp(modifier: Modifier = Modifier) {
     Surface(modifier) {
-        ItemsView()
+        ItemsScreen()
     }
 }
 
 @Preview
 @Composable
-fun ItemsView(
+fun ItemsScreen(
     modifier: Modifier = Modifier,
     contentPadding: PaddingValues = PaddingValues(0.dp)
 ) {
