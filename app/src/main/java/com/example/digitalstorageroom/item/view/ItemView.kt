@@ -3,6 +3,7 @@ package com.example.digitalstorageroom.item.view
 import android.util.Log
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Column
+import androidx.compose.foundation.layout.PaddingValues
 import androidx.compose.foundation.layout.Row
 import androidx.compose.foundation.layout.Spacer
 import androidx.compose.foundation.layout.fillMaxSize
@@ -241,8 +242,14 @@ fun MyApp(modifier: Modifier = Modifier) {
 
 @Preview
 @Composable
-fun ItemsView(modifier: Modifier = Modifier) {
-    LazyColumn (modifier = modifier.padding(vertical = 4.dp)) {
+fun ItemsView(
+    modifier: Modifier = Modifier,
+    contentPadding: PaddingValues = PaddingValues(0.dp)
+) {
+    LazyColumn (
+        modifier = modifier,
+        contentPadding = contentPadding
+    ) {
         items(staticItems) { item ->
             ItemView(item, Modifier.animateItem())
         }
