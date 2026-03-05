@@ -1,0 +1,10 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<project version="4">
+  <component name="Valkyrie.Settings">
+    <option name="iconPackDestination" value="D:\Android\AndroidStudioProjects\DigitalStorageRoom\app\src\main\java\com\example\digitalstorageroom\ui\icons" />
+    <option name="iconPackName" value="Material" />
+    <option name="mode" value="IconPack" />
+    <option name="packageName" value="com.example.digitalstorageroom.ui.icons" />
+    <option name="useExplicitMode" value="true" />
+  </component>
+</project>
