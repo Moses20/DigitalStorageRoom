@@ -19,6 +19,7 @@ import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.getValue
 import androidx.compose.runtime.mutableIntStateOf
+import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.saveable.rememberSaveable
 import androidx.compose.runtime.setValue
 import androidx.compose.ui.Alignment
@@ -29,7 +30,7 @@ import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
 import androidx.navigation.compose.rememberNavController
-import com.example.digitalstorageroom.item.view.ItemsScreen
+import com.example.digitalstorageroom.scanner.CameraScreen
 import com.example.digitalstorageroom.ui.AppNavHost
 import com.example.digitalstorageroom.ui.BottomAppBar
 import com.example.digitalstorageroom.ui.DestinationInit
@@ -64,6 +65,7 @@ class MainActivity : ComponentActivity() {
                 val navController = rememberNavController()
                 val startDestination = DestinationInit.START
                 var selectedDestination by rememberSaveable { mutableIntStateOf(startDestination.ordinal) }
+                var openCameraView by rememberSaveable { mutableStateOf(false) }
 
                 Scaffold (
                     //color = MaterialTheme.colorScheme.background
@@ -74,7 +76,13 @@ class MainActivity : ComponentActivity() {
                             selectedDestination = selectedDestination,
                             navController = navController,
                             modifier = Modifier
-                                .fillMaxWidth()
+                                .fillMaxWidth(),
+                            barCodeButtonOnClick = {
+                                if (!openCameraView) openCameraView = true
+                                println("Take phot")
+                                                   },
+                            onNavItemsClick = { if(openCameraView) openCameraView = false }
+
                                 //TODO: Check if this really is the way to move the nav bar from the bottom
                                 //.windowInsetsBottomHeight(WindowInsets(bottom = 130.dp)),
                         )
@@ -88,7 +96,11 @@ class MainActivity : ComponentActivity() {
                         contentPadding = innerPadding
                     )*/
 
-                    AppNavHost(navController, startDestination, modifier = Modifier.padding(contentPadding))
+                    if(openCameraView) {
+                        CameraScreen()
+                    }else {
+                        AppNavHost(navController, startDestination, modifier = Modifier.padding(contentPadding))
+                    }
 
                     /*LazyColumn(
                         Modifier.fillMaxSize(),

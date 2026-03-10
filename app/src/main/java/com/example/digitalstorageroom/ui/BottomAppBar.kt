@@ -126,6 +126,8 @@ fun BottomAppBar(
     selectedDestination: Int,
     selectDestination: (Int) -> Unit,
     navController: NavHostController = rememberNavController(),
+    barCodeButtonOnClick: () -> Unit,
+    onNavItemsClick: () -> Unit = {},
     floatingActionButton: @Composable (() -> Unit)? = null
 ) {
 
@@ -162,6 +164,7 @@ fun BottomAppBar(
                 NavigationBarItem(
                     selected = selectedDestination == index,
                     onClick = {
+                        onNavItemsClick()
                         navController.navigate(route = destination.route)
                         selectDestination(index)
                     },
@@ -184,7 +187,7 @@ fun BottomAppBar(
                 .height(BUTTON_HEIGHT)
                 .clip(CircleShape)
                 .background(Color.LightGray)
-                .clickable(onClick = {println("Box clicked")})
+                .clickable(onClick = barCodeButtonOnClick)
             ,
             contentAlignment = Alignment.Center
             //onClick = {println("Ahhh")}
@@ -198,6 +201,8 @@ fun BottomAppBar(
     }
 }
 
+
+//TODO: THIS IS UNUSED
 @Composable
 fun CustomBottomAppBar(
     modifier: Modifier = Modifier.fillMaxWidth(),
