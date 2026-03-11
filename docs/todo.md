@@ -8,6 +8,9 @@ An overview over some todos, to small or specific to be written down as a requir
 
 
 - [x] Create the foundation for a **BottomNavigationBar**.
+- [ ] Learn about use cases
+  - https://developer.android.com/topic/architecture
+  - https://proandroiddev.com/android-use-cases-from-basic-implementation-to-multi-provider-systems-0dd8bf2eee03
 - [ ] What is a NavHostController, how does it work, and when to use it.
 - [ ] Build and use a Colorscheme to be used for the hole Application.
 - [ ] Build and use a Stylescheme / Style guide. 
