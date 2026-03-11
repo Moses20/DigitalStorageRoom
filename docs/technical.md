@@ -26,4 +26,10 @@ RemoveItemEvet("barcode-1", "kuehlschrank"), gibt akkumuliert den Bestand für "
 ## TODO's
 - [ ] Introduce a linter and linting rules
   - What are common linting rules for Android applications?
-- 
+
+### ScanningSession
+- ScanningSession
+  - startDate
+  - stopDate
+  - items: List<Pair<Int, Item>> Or Map<Int, Item> ()
+Or instead of a ScanningSession i create ScanEvents (used for EventSourcing)
