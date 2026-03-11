@@ -38,6 +38,7 @@ import com.example.digitalstorageroom.scanner.CameraViewModel
 import com.example.digitalstorageroom.ui.AppNavHost
 import com.example.digitalstorageroom.ui.BottomAppBar
 import com.example.digitalstorageroom.ui.DestinationInit
+import com.example.digitalstorageroom.ui.Route
 import com.example.digitalstorageroom.ui.theme.DigitalStorageRoomTheme
 import kotlinx.coroutines.CoroutineScope
 import kotlinx.coroutines.Dispatchers
@@ -57,7 +58,6 @@ class MainActivity : ComponentActivity() {
     )
 
 
-
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
 
@@ -69,34 +69,31 @@ class MainActivity : ComponentActivity() {
                 val navController = rememberNavController()
                 val startDestination = DestinationInit.START
                 var selectedDestination by rememberSaveable { mutableIntStateOf(startDestination.ordinal) }
-                var openCameraView by rememberSaveable { mutableStateOf(false) }
 
                 val cameraViewModel = remember { CameraViewModel() }
 
-                Scaffold (
+                Scaffold(
                     //color = MaterialTheme.colorScheme.background
                     containerColor = Color.Transparent,
                     bottomBar = {
                         BottomAppBar(
-                            selectDestination = { selectedDestination = it},
+                            selectDestination = { selectedDestination = it },
                             selectedDestination = selectedDestination,
                             navController = navController,
                             modifier = Modifier
                                 .fillMaxWidth(),
-                            isCameraOpen = openCameraView,
                             barCodeButtonOnClick = {
-                                if (!openCameraView) openCameraView = true
-                               Log.i("INFO", "Open camera view")
-                                                   },
-                            onNavItemsClick = { if(openCameraView) openCameraView = false },
+                                navController.navigate(Route.CAMERA.name)
+                                Log.i("INFO", "Open camera view")
+                            },
                             onTakePhotoClick = {
                                 CoroutineScope(Dispatchers.IO).launch {
                                     cameraViewModel.takePhoto()
                                 }
                             }
 
-                                //TODO: Check if this really is the way to move the nav bar from the bottom
-                                //.windowInsetsBottomHeight(WindowInsets(bottom = 130.dp)),
+                            //TODO: Check if this really is the way to move the nav bar from the bottom
+                            //.windowInsetsBottomHeight(WindowInsets(bottom = 130.dp)),
                         )
                     }
                 ) { contentPadding ->
@@ -108,13 +105,15 @@ class MainActivity : ComponentActivity() {
                         contentPadding = innerPadding
                     )*/
 
-                    if(openCameraView) {
-                        CameraScreen(
-                            cameraViewModel = cameraViewModel
+                    AppNavHost(
+                        navController,
+                        startDestination,
+                        modifier = Modifier.padding(contentPadding),
+                        routes = mapOf(
+                            Route.CAMERA to { CameraScreen(cameraViewModel = cameraViewModel) }
                         )
-                    }else {
-                        AppNavHost(navController, startDestination, modifier = Modifier.padding(contentPadding))
-                    }
+                    )
+
 
                     /*LazyColumn(
                         Modifier.fillMaxSize(),
@@ -154,7 +153,7 @@ fun VolumeScreen(device: SmartTvDevice) {
             Button(
                 onClick = device::decreaseSpeakerVolume
             ) {
-                Text(text="-")
+                Text(text = "-")
             }
         }
     }
@@ -211,7 +210,7 @@ class SmartTvDevice(
 
     private var channelNumber by RangeRegulator(initialValue = 1, minValue = 0, maxValue = 200)
 
-     fun increaseSpeakerVolume() {
+    fun increaseSpeakerVolume() {
         CoroutineScope(Dispatchers.IO).launch {
             sleep(1000)
             speakerVolume++
@@ -269,7 +268,7 @@ fun ItemPreview(item: Item) = Text(
 
 @Composable
 fun Greeting(name: String, from: String, modifier: Modifier = Modifier) {
-    Column (modifier) {
+    Column(modifier) {
         Text(
             text = "Happy Birthday $name!",
             //modifier = modifier.padding(24.dp),
@@ -291,10 +290,12 @@ fun Greeting(name: String, from: String, modifier: Modifier = Modifier) {
 @Composable
 fun GreetingPreview() {
     DigitalStorageRoomTheme {
-       //Greeting("Patrick", "From Klaus")
-        VolumeScreen(SmartTvDevice(
-            "Samsung",
-            "TV"
-        ))
+        //Greeting("Patrick", "From Klaus")
+        VolumeScreen(
+            SmartTvDevice(
+                "Samsung",
+                "TV"
+            )
+        )
     }
 }

@@ -2,6 +2,7 @@ package com.example.digitalstorageroom.ui
 
 import android.R
 import android.annotation.SuppressLint
+import android.util.Log
 import androidx.compose.foundation.background
 import androidx.compose.foundation.border
 import androidx.compose.foundation.clickable
@@ -82,16 +83,29 @@ fun PlaylistScreen(modifier: Modifier = Modifier) {
     }
 }
 
+//TODO Change this, this is to limiting, what if we want a camera route
+
+enum class  Route {
+    STORAGE,
+    ALBUM,
+    PLAYLIST,
+    ITEMS,
+    CAMERA,
+    EDIT;
+}
+
 enum class Destination(
-    val route: String,
+    val route: Route,
     val label: String,
     val icon: ImageVector,
     val contentDescription: String
 ) {
-    STORAGE("storage", "Storage", Material.HomeStorage, "Storage"),
+    STORAGE(Route.STORAGE, "Storage", Material.HomeStorage, "Storage"),
+
     //CHECK("album", "Album", Icons.Default.Check, "Album"),
-    EDIT("playlist", "Playlist", Icons.Default.Edit, "Playlist"),
+    EDIT(Route.EDIT, "Playlist", Icons.Default.Edit, "Playlist"),
 }
+
 
 object DestinationInit {
     val START = Destination.STORAGE
@@ -101,24 +115,35 @@ object DestinationInit {
 fun AppNavHost(
     navController: NavHostController,
     startDestination: Destination,
+    routes: Map<Route, @Composable (() -> Unit)>,
     modifier: Modifier = Modifier
 ) {
     NavHost(
         navController,
-        startDestination = startDestination.route
+        startDestination = startDestination.route.name
     ) {
-        Destination.entries.forEach { destination ->
-            composable(destination.route) {
-                when (destination) {
-                    Destination.STORAGE -> SongsScreen()
+        Route.entries.forEach { route ->
+            composable(route.name) {
+                when (route) {
+                    Route.STORAGE -> SongsScreen()
                     //Destination.CHECK -> AlbumScreen()
-                    Destination.EDIT -> ItemsScreen()
+                    Route.EDIT -> ItemsScreen()
+                    Route.CAMERA -> routes[Route.CAMERA]?.invoke()
+                    else -> {
+                        Log.e("ERROR", "Route not found: $route")
+                    }
                 }
+                //TODO: When can be replaced by
+                // routes[route]?.invoke()
             }
         }
     }
 }
 
+//TODO: We need a way to get the height
+val PARENT_BOX_HEIGHT = 104.dp
+val BUTTON_HEIGHT = 70.dp
+val BUTTON_CUTOUT_HEIGHT = BUTTON_HEIGHT + 40.dp
 
 @SuppressLint("UnusedBoxWithConstraintsScope")
 @Composable
@@ -128,18 +153,12 @@ fun BottomAppBar(
     selectDestination: (Int) -> Unit,
     navController: NavHostController = rememberNavController(),
     barCodeButtonOnClick: () -> Unit,
-    isCameraOpen: Boolean,
-    onNavItemsClick: () -> Unit = {},
     onTakePhotoClick: () -> Unit = {},
     floatingActionButton: @Composable (() -> Unit)? = null
 ) {
 
-    val PARENT_BOX_HEIGHT = 104.dp
-    val BUTTON_HEIGHT = 70.dp
-    val BUTTON_CUTOUT_HEIGHT = BUTTON_HEIGHT + 40.dp
     // calculate the offset, so that the half of the circular button is on the top edge of the BoxWithContstraints
-    val yOffsetButton = (-((PARENT_BOX_HEIGHT-BUTTON_HEIGHT)/2)- (BUTTON_HEIGHT/2))
-
+    val yOffsetButton = (-((PARENT_BOX_HEIGHT - BUTTON_HEIGHT) / 2) - (BUTTON_HEIGHT / 2))
 
     Box(
         contentAlignment = Alignment.Center
@@ -169,8 +188,7 @@ fun BottomAppBar(
                 NavigationBarItem(
                     selected = selectedDestination == index,
                     onClick = {
-                        onNavItemsClick()
-                        navController.navigate(route = destination.route)
+                        navController.navigate(route = destination.route.name)
                         selectDestination(index)
                     },
                     icon = {
@@ -179,12 +197,12 @@ fun BottomAppBar(
                             contentDescription = destination.contentDescription
                         )
                     },
-                    label = { Text(destination.label)}
+                    label = { Text(destination.label) }
                 )
             }
         }
 
-        Box (
+        Box(
             modifier = Modifier
                 .offset(y = yOffsetButton)
                 .padding(2.dp)
@@ -193,9 +211,9 @@ fun BottomAppBar(
                 .clip(CircleShape)
                 .background(Color.LightGray)
                 .clickable {
-                    if (isCameraOpen) onTakePhotoClick() else barCodeButtonOnClick()
-                }
-            ,
+                    //If the camera screen is already open we want to use this button to scan an item
+                    if (navController.currentDestination?.route == Route.CAMERA.name) onTakePhotoClick() else barCodeButtonOnClick()
+                },
             contentAlignment = Alignment.Center
             //onClick = {println("Ahhh")}
         ) {
@@ -248,9 +266,7 @@ fun CustomBottomAppBar(
                             bottomStart = 50.dp
                         )
                     )
-                    .background(Color.Green)
-
-                ,
+                    .background(Color.Green),
                 horizontalArrangement = Arrangement.SpaceBetween,
                 verticalAlignment = Alignment.CenterVertically,
                 content = actions
@@ -260,13 +276,11 @@ fun CustomBottomAppBar(
                     .offset(y = (-20).dp)
                     .clip(CircleShape)
                     .border(5.dp, Color.Transparent)
-                    .background(Color.LightGray)
-
-                ,
+                    .background(Color.LightGray),
                 horizontalArrangement = Arrangement.Center,
                 verticalAlignment = Alignment.Bottom,
             ) {
-                IconButton (
+                IconButton(
 
                     onClick = { println("Do nothing!") },
                     //border = BorderStroke(width = 5.dp, Color.Black)
