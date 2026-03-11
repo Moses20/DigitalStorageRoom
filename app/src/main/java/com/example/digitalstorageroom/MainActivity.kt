@@ -8,6 +8,7 @@ import androidx.activity.ComponentActivity
 import androidx.activity.compose.setContent
 import androidx.activity.enableEdgeToEdge
 import androidx.annotation.RequiresApi
+import androidx.camera.lifecycle.ProcessCameraProvider
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.Row
@@ -51,12 +52,11 @@ class MainActivity : ComponentActivity() {
         "TV"
     )
 
-    @RequiresApi(Build.VERSION_CODES.R)
+
+
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
 
-        println("SCREENHEIGHT")
-        println(getScreenDimensions())
         enableEdgeToEdge()
         setContent {
             DigitalStorageRoomTheme {
@@ -114,23 +114,6 @@ class MainActivity : ComponentActivity() {
                 }
             }
         }
-    }
-
-    @RequiresApi(Build.VERSION_CODES.R)
-    private fun getScreenDimensions(): Pair<Int, Int> {
-            // For Android 11 and above
-            // Get the window metrics
-            14.dp
-
-            val windowMetrics: WindowMetrics = windowManager.currentWindowMetrics
-            // Get the insets and bounds of the window
-            val insets = windowMetrics.windowInsets.getInsetsIgnoringVisibility(systemBars())
-            // Calculate the width and height of the screen
-            val bounds = windowMetrics.bounds
-            val width = bounds.width() - insets.left - insets.right
-            val height = bounds.height() - insets.top - insets.bottom
-            // Return the width and height
-            return Pair(width, height)
     }
 }
 
