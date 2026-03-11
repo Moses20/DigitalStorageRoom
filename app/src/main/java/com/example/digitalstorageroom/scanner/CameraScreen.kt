@@ -19,7 +19,6 @@ import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.LaunchedEffect
 import androidx.compose.runtime.getValue
-import androidx.compose.runtime.remember
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.platform.LocalContext
@@ -41,10 +40,14 @@ import kotlinx.coroutines.flow.StateFlow
 @Composable
 fun CameraScreen(
     modifier: Modifier = Modifier,
+    cameraViewModel: CameraViewModel,
 ) {
     val cameraPermissionState = rememberPermissionState(android.Manifest.permission.CAMERA)
     if (cameraPermissionState.status.isGranted) {
-        CameraContent(modifier)
+        CameraContent(
+            modifier,
+            cameraViewModel
+        )
     } else {
         Column(
             modifier = modifier.fillMaxSize().wrapContentSize().widthIn(max = 480.dp),
@@ -71,15 +74,16 @@ fun CameraScreen(
 @Composable
 fun CameraContent(
     modifier: Modifier = Modifier,
+    cameraViewModel: CameraViewModel,
     lifecycleOwner: LifecycleOwner = LocalLifecycleOwner.current
 ) {
     val context = LocalContext.current
     // Fix: Use remember to prevent creating a new ViewModel and UseCase on every recomposition
-    val viewModel = remember { CameraViewModel() }
-    val surfaceRequest by viewModel.surfaceRequest.collectAsStateWithLifecycle()
+    //val cameraViewModel = remember { CameraViewModel() }
+    val surfaceRequest by cameraViewModel.surfaceRequest.collectAsStateWithLifecycle()
 
-    LaunchedEffect(viewModel, lifecycleOwner) {
-        viewModel.bindToCamera(context.applicationContext, lifecycleOwner)
+    LaunchedEffect(cameraViewModel, lifecycleOwner) {
+        cameraViewModel.bindToCamera(context.applicationContext, lifecycleOwner)
     }
 
     Box(modifier = modifier.fillMaxSize()) {
@@ -123,5 +127,9 @@ class CameraViewModel : ViewModel() {
         } finally {
             processCameraProvider.unbindAll()
         }
+    }
+
+    suspend fun takePhoto() {
+        println("INFO: I have taken a photo!!")
     }
 }

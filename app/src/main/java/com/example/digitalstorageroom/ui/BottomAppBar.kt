@@ -1,5 +1,6 @@
 package com.example.digitalstorageroom.ui
 
+import android.R
 import android.annotation.SuppressLint
 import androidx.compose.foundation.background
 import androidx.compose.foundation.border
@@ -127,7 +128,9 @@ fun BottomAppBar(
     selectDestination: (Int) -> Unit,
     navController: NavHostController = rememberNavController(),
     barCodeButtonOnClick: () -> Unit,
+    isCameraOpen: Boolean,
     onNavItemsClick: () -> Unit = {},
+    onTakePhotoClick: () -> Unit = {},
     floatingActionButton: @Composable (() -> Unit)? = null
 ) {
 
@@ -147,18 +150,20 @@ fun BottomAppBar(
 
             //Cutout: https://blog.jakelee.co.uk/how-to-make-cutouts-in-jetpack-compose-boxes/
             modifier = Modifier
-                    .graphicsLayer {
-                compositingStrategy = CompositingStrategy.Offscreen
-            }.drawWithContent {
-                drawContent()
-                val yOffsetButtonCutout = ((size.height - BUTTON_CUTOUT_HEIGHT.value)/2 + (BUTTON_CUTOUT_HEIGHT.value/2))
-                drawCircle(
-                    color = Color(0xFFFFFFFF),
-                    center = size.center.minus(Offset(x = 0f, y = yOffsetButtonCutout)),
-                    radius = BUTTON_CUTOUT_HEIGHT.value,
-                    blendMode = BlendMode.DstOut
-                )
-            }
+                .graphicsLayer {
+                    compositingStrategy = CompositingStrategy.Offscreen
+                }
+                .drawWithContent {
+                    drawContent()
+                    val yOffsetButtonCutout =
+                        ((size.height - BUTTON_CUTOUT_HEIGHT.value) / 2 + (BUTTON_CUTOUT_HEIGHT.value / 2))
+                    drawCircle(
+                        color = Color(0xFFFFFFFF),
+                        center = size.center.minus(Offset(x = 0f, y = yOffsetButtonCutout)),
+                        radius = BUTTON_CUTOUT_HEIGHT.value,
+                        blendMode = BlendMode.DstOut
+                    )
+                }
         ) {
             Destination.entries.forEachIndexed { index, destination ->
                 NavigationBarItem(
@@ -187,7 +192,9 @@ fun BottomAppBar(
                 .height(BUTTON_HEIGHT)
                 .clip(CircleShape)
                 .background(Color.LightGray)
-                .clickable(onClick = barCodeButtonOnClick)
+                .clickable {
+                    if (isCameraOpen) onTakePhotoClick() else barCodeButtonOnClick()
+                }
             ,
             contentAlignment = Alignment.Center
             //onClick = {println("Ahhh")}
