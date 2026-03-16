@@ -15,7 +15,7 @@ enum class CodeType{
     //https://www.scandit.com/resources/guides/types-of-barcodes-choosing-the-right-barcode/
 
     /*### EAN Code ###*/
-    EAN_13,
+    EAN_13,// Add regex
     EAN_8,
     JAN_13,
     ISBN,
@@ -25,6 +25,10 @@ enum class CodeType{
     QR
 
 }
+data class Code(
+    val code: String,
+    val type: CodeType = CodeType.EAN_13
+)
 
 data class BarcodeItem (
     val barcode: String,
