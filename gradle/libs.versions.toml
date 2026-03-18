@@ -11,6 +11,7 @@ composeBom = "2024.09.00"
 navigationCompose = "2.9.7"
 camerax = "1.5.3"
 accompanist = "0.37.3"
+barcode-scanning = "17.3.0"
 
 
 [libraries]
@@ -33,6 +34,9 @@ androidx-compose-material3 = { group = "androidx.compose.material3", name = "mat
 androidx-camera-compose = { module = "androidx.camera:camera-compose", version.ref = "camerax" }
 
 accompanist-permissions = { module = "com.google.accompanist:accompanist-permissions", version.ref = "accompanist" }
+
+mlkit-barcode-scanning = { module = "com.google.mlkit:barcode-scanning", version.ref = "barcode-scanning" }
+
 
 [plugins]
 android-application = { id = "com.android.application", version.ref = "agp" }

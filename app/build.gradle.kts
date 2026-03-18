@@ -63,6 +63,10 @@ dependencies {
     implementation("androidx.camera:camera-extensions:${camerax_version}")
     implementation(libs.androidx.camera.compose)
 
+    //ML-Kit
+    implementation(libs.mlkit.barcode.scanning)
+
+
     //A library which provides Android runtime permissions support for Jetpack Compose
     implementation(libs.accompanist.permissions)
 
