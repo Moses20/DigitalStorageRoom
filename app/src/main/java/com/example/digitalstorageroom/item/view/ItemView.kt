@@ -1,12 +1,14 @@
 package com.example.digitalstorageroom.item.view
 
+import android.graphics.drawable.shapes.RoundRectShape
+import android.graphics.drawable.shapes.Shape
 import android.util.Log
+import androidx.compose.animation.animateContentSize
 import androidx.compose.animation.core.Spring
 import androidx.compose.animation.core.animateDpAsState
 import androidx.compose.animation.core.spring
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Column
-import androidx.compose.foundation.layout.PaddingValues
 import androidx.compose.foundation.layout.Row
 import androidx.compose.foundation.layout.Spacer
 import androidx.compose.foundation.layout.fillMaxSize
@@ -15,8 +17,13 @@ import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.lazy.LazyColumn
 import androidx.compose.foundation.lazy.items
 import androidx.compose.foundation.lazy.rememberLazyListState
+import androidx.compose.foundation.shape.RoundedCornerShape
+import androidx.compose.material.icons.Icons.Filled
+import androidx.compose.material.icons.filled.ExpandLess
+import androidx.compose.material.icons.filled.ExpandMore
 import androidx.compose.material3.Button
-import androidx.compose.material3.ElevatedButton
+import androidx.compose.material3.Icon
+import androidx.compose.material3.IconButton
 import androidx.compose.material3.ListItem
 import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.Scaffold
@@ -33,11 +40,15 @@ import androidx.compose.runtime.remember
 import androidx.compose.runtime.saveable.rememberSaveable
 import androidx.compose.runtime.setValue
 import androidx.compose.ui.Modifier
+import androidx.compose.ui.draw.clip
+import androidx.compose.ui.draw.shadow
+import androidx.compose.ui.res.stringResource
+import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.unit.dp
 import androidx.lifecycle.ViewModel
 import androidx.lifecycle.compose.collectAsStateWithLifecycle
-import com.example.digitalstorageroom.ui.theme.DigitalStorageRoomTheme
+import com.example.digitalstorageroom.R
 import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.StateFlow
 import kotlin.random.Random
@@ -233,50 +244,73 @@ fun ListAnimatedItems(
 fun ItemView(item: Item, modifier: Modifier = Modifier) {
     var showItemDetailView by rememberSaveable { mutableStateOf(false) }
 
-    val extraPadding by animateDpAsState(
+    /*val extraPadding by animateDpAsState(
         if (showItemDetailView) 48.dp else 0.dp,
         animationSpec = spring(
             dampingRatio = Spring.DampingRatioMediumBouncy,
             stiffness = Spring.StiffnessLow
         )
-    )
+    )*/
 
     Surface(
         color = MaterialTheme.colorScheme.primary,
         modifier = modifier
             .padding(vertical = 4.dp, horizontal = 8.dp)
+            //TIP: Achieve card look through shadow and clop, alternatively use the Material Card.
+            .shadow(4.dp)
+            .clip(RoundedCornerShape(10.dp))
     ) {
-        Column(
-            Modifier
-                .padding(bottom = extraPadding
-                    // Make sure that the padding is never negativ
-                    .coerceAtLeast(0.dp)
+        Row(
+            modifier = Modifier
+                .padding(12.dp)
+                .animateContentSize(
+                    animationSpec = spring(
+                        dampingRatio = Spring.DampingRatioMediumBouncy,
+                        stiffness = Spring.StiffnessLow
+                    )
                 )
+                /*.padding(
+                    bottom = extraPadding
+                        // Make sure that the padding is never negativ
+                        .coerceAtLeast(0.dp)
+                ),*/
+            //verticalAlignment = Alignment.CenterVertically
         ) {
-            Row (modifier = Modifier.padding(12.dp),
-                //verticalAlignment = Alignment.CenterVertically
-            ){
-                Column(
-                    modifier = Modifier
-                        //Important: there's no 'alignEnd' so weighted elements
-                        // pushes away all elements without a weight.
-                        .weight(1f)
+            Column(
+                modifier = Modifier
+                    //Important: there's no 'alignEnd' so weighted elements
+                    // pushes away all elements without a weight.
+                    .weight(1f)
+                    .padding(12.dp)
 
-
+            ) {
+                Text(
+                    text = item.name, style = MaterialTheme.typography.headlineMedium.copy(
+                        fontWeight = FontWeight.Bold
+                    )
+                )
+                Text(text = item.amount.toString())
+                if (showItemDetailView) {
+                    ItemDetailView(item)
+                }
+            }
+            IconButton(
+                onClick = { showItemDetailView = !showItemDetailView },
+            ) {
+                Icon(
+                    imageVector = if (showItemDetailView) Filled.ExpandLess else Filled.ExpandMore,
+                    contentDescription = if (showItemDetailView) stringResource(R.string.show_less) else stringResource(
+                        R.string.show_more
+                    )
+                )
+            }
+            /*ElevatedButton(
+                onClick = { showItemDetailView = !showItemDetailView },
                 ) {
-                    Text(text = item.name, style = MaterialTheme.typography.headlineMedium)
-                    Text(text = item.amount.toString())
-                }
-                ElevatedButton(
-                    onClick = { showItemDetailView = !showItemDetailView },
-                    ) {
-                    Text(text = if(showItemDetailView) "Close" else "Open")
-                }
-            }
-            if (showItemDetailView) {
-                ItemDetailView(item)
-            }
+                Text(text = if(showItemDetailView) "Close" else "Open")
+            }*/
         }
+
     }
 }
 
@@ -287,7 +321,7 @@ fun ItemDetailView(
 ) {
     Text(
         modifier = modifier,
-        text = item.description
+        text = "${item.description}\n".repeat(5)
     )
 }
 

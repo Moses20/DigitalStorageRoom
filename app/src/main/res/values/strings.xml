@@ -1,4 +1,8 @@
 <resources>
     <string name="app_name">Digital Storage Room</string>
     <string name="roll">Roll</string>
+
+
+    <string name="show_less">Show less</string>
+    <string name="show_more">Show more</string>
 </resources>

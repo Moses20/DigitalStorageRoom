@@ -63,9 +63,13 @@ dependencies {
     implementation("androidx.camera:camera-extensions:${camerax_version}")
     implementation(libs.androidx.camera.compose)
 
+    // Material
+    implementation("androidx.compose.material:material-icons-extended")
+
     //A library which provides Android runtime permissions support for Jetpack Compose
     implementation(libs.accompanist.permissions)
 
+    // Tests
     testImplementation(libs.junit)
     androidTestImplementation(libs.androidx.junit)
     androidTestImplementation(libs.androidx.espresso.core)
