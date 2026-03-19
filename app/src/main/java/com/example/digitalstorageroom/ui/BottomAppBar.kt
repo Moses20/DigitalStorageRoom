@@ -51,7 +51,7 @@ import com.example.digitalstorageroom.ui.icons.Barcode
 import com.example.digitalstorageroom.ui.icons.HomeStorage
 import com.example.digitalstorageroom.ui.icons.Material
 import androidx.navigation.compose.rememberNavController
-import com.example.digitalstorageroom.item.view.ItemsScreen
+import com.example.digitalstorageroom.item.ItemsScreen
 
 @Composable
 fun SongsScreen(modifier: Modifier = Modifier) {

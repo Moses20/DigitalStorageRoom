@@ -64,6 +64,8 @@ class MainActivity : ComponentActivity() {
         enableEdgeToEdge()
         setContent {
             DigitalStorageRoomTheme {
+                //TODO: Move the following code into a MyApp or DigitalStorageRoom Composable to clean up this entry
+
                 //Used Surface before. But google seems to recommend Scaffold as it uses enableEdgeToEdge(), see https://stackoverflow.com/questions/78823208/scaffold-vs-surface
 
                 val navController = rememberNavController()

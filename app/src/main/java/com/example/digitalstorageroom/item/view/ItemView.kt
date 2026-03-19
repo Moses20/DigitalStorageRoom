@@ -1,6 +1,9 @@
 package com.example.digitalstorageroom.item.view
 
 import android.util.Log
+import androidx.compose.animation.core.Spring
+import androidx.compose.animation.core.animateDpAsState
+import androidx.compose.animation.core.spring
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.PaddingValues
@@ -27,6 +30,7 @@ import androidx.compose.runtime.getValue
 import androidx.compose.runtime.mutableIntStateOf
 import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.remember
+import androidx.compose.runtime.saveable.rememberSaveable
 import androidx.compose.runtime.setValue
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.tooling.preview.Preview
@@ -87,14 +91,6 @@ val staticItems: List<Item> = List(20) { Item("Item $it", it, "Das ist eine Besc
 )*/
 
 
-
-@Preview
-@Composable
-fun MyAppPreview() {
-    DigitalStorageRoomTheme {
-        MyApp(Modifier.fillMaxSize())
-    }
-}
 
 
 @Composable
@@ -234,45 +230,29 @@ fun ListAnimatedItems(
 }
 
 @Composable
-fun MyApp(modifier: Modifier = Modifier) {
-    Surface(modifier) {
-        ItemsScreen()
-    }
-}
-
-@Preview
-@Composable
-fun ItemsScreen(
-    modifier: Modifier = Modifier,
-    contentPadding: PaddingValues = PaddingValues(0.dp)
-) {
-    LazyColumn (
-        modifier = modifier,
-        contentPadding = contentPadding
-    ) {
-        items(staticItems) { item ->
-            ItemView(item, Modifier.animateItem())
-        }
-    }
-}
-
-
-@Composable
 fun ItemView(item: Item, modifier: Modifier = Modifier) {
-    var showItemDetailView by remember { mutableStateOf(false) }
+    var showItemDetailView by rememberSaveable { mutableStateOf(false) }
 
-    //SingleChoiceSegmentedButtonRow
-
-
-
-
+    val extraPadding by animateDpAsState(
+        if (showItemDetailView) 48.dp else 0.dp,
+        animationSpec = spring(
+            dampingRatio = Spring.DampingRatioMediumBouncy,
+            stiffness = Spring.StiffnessLow
+        )
+    )
 
     Surface(
         color = MaterialTheme.colorScheme.primary,
         modifier = modifier
             .padding(vertical = 4.dp, horizontal = 8.dp)
     ) {
-        Column() {
+        Column(
+            Modifier
+                .padding(bottom = extraPadding
+                    // Make sure that the padding is never negativ
+                    .coerceAtLeast(0.dp)
+                )
+        ) {
             Row (modifier = Modifier.padding(12.dp),
                 //verticalAlignment = Alignment.CenterVertically
             ){
@@ -281,12 +261,11 @@ fun ItemView(item: Item, modifier: Modifier = Modifier) {
                         //Important: there's no 'alignEnd' so weighted elements
                         // pushes away all elements without a weight.
                         .weight(1f)
+
+
                 ) {
-                    Text(
-                        text = item.name)
-                    Text(
-                        text = item.amount.toString(),
-                    )
+                    Text(text = item.name, style = MaterialTheme.typography.headlineMedium)
+                    Text(text = item.amount.toString())
                 }
                 ElevatedButton(
                     onClick = { showItemDetailView = !showItemDetailView },
@@ -302,8 +281,14 @@ fun ItemView(item: Item, modifier: Modifier = Modifier) {
 }
 
 @Composable
-fun ItemDetailView(item: Item) {
-    Text(text = item.description)
+fun ItemDetailView(
+    item: Item,
+    modifier: Modifier = Modifier
+) {
+    Text(
+        modifier = modifier,
+        text = item.description
+    )
 }
 
 @Preview
