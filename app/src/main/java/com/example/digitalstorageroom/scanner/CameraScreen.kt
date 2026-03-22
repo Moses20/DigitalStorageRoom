@@ -237,9 +237,12 @@ class BarcodeScanner {
         val image = InputImage.fromMediaImage(mediaImage, imageProxy.imageInfo.rotationDegrees)
         scanner.process(image)
             .addOnSuccessListener { barcodes ->
+                // The barcode with the biggest bounding box is deemed to be the one focused by the user
                 cont.resume(barcodes.maxByOrNull { it.boundingBox?.let { b -> b.width() * b.height() } ?: 0 })
             }
-            .addOnFailureListener { cont.resume(null) }
+            .addOnFailureListener {
+                cont.resume(null)
+            }
             .addOnCompleteListener { imageProxy.close() }
     }
 }
