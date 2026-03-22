@@ -17,6 +17,11 @@ An overview over some todos, to small or specific to be written down as a requir
 - [ ] Replace static text with text from res.values.strings. 
   - How should the text for different languages be handled?
 
+## Web Page
+- An alternative to the app.
+- Technologies
+  - React, typescript, tailwindcss
+  - Use figma maker for the design
 
 ## Home Cluster
 - Setup both pis to be used for a kubernetes cluster

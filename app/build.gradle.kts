@@ -55,21 +55,25 @@ dependencies {
 
     // Camera
     //TODO: Do i really need everything?
-    implementation("androidx.camera:camera-core:${camerax_version}")
-    implementation("androidx.camera:camera-camera2:${camerax_version}")
-    implementation("androidx.camera:camera-lifecycle:${camerax_version}")
-    implementation("androidx.camera:camera-video:${camerax_version}")
-    implementation("androidx.camera:camera-view:${camerax_version}")
-    implementation("androidx.camera:camera-extensions:${camerax_version}")
+    implementation(libs.androidx.camera.core)
+    implementation(libs.androidx.camera.camera2)
+    implementation(libs.androidx.camera.lifecycle)
+    implementation(libs.androidx.camera.video)
+    implementation(libs.androidx.camera.view)
+    implementation(libs.androidx.camera.extensions)
     implementation(libs.androidx.camera.compose)
 
     //ML-Kit
     implementation(libs.mlkit.barcode.scanning)
 
 
+    // Material
+    implementation(libs.androidx.compose.material.icons.extended)
+
     //A library which provides Android runtime permissions support for Jetpack Compose
     implementation(libs.accompanist.permissions)
 
+    // Tests
     testImplementation(libs.junit)
     androidTestImplementation(libs.androidx.junit)
     androidTestImplementation(libs.androidx.espresso.core)
