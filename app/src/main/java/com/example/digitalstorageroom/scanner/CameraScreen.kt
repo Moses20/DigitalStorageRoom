@@ -1,6 +1,8 @@
 package com.example.digitalstorageroom.scanner
 
+import android.Manifest
 import android.content.Context
+import android.graphics.RectF
 import android.util.Log
 import android.util.Size
 import androidx.camera.compose.CameraXViewfinder
@@ -16,7 +18,7 @@ import androidx.camera.core.SurfaceRequest
 import androidx.camera.core.UseCase
 import androidx.camera.lifecycle.ProcessCameraProvider
 import androidx.camera.lifecycle.awaitInstance
-import androidx.camera.view.CameraController
+import androidx.compose.foundation.Canvas
 import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.Spacer
@@ -31,7 +33,17 @@ import androidx.compose.runtime.LaunchedEffect
 import androidx.compose.runtime.getValue
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
+import androidx.compose.ui.draw.drawWithCache
+import androidx.compose.ui.geometry.Offset
+import androidx.compose.ui.geometry.Size as ComposeSize
+import androidx.compose.ui.graphics.Color
+import androidx.compose.ui.graphics.drawscope.Stroke
 import androidx.compose.ui.platform.LocalContext
+import androidx.compose.ui.text.TextLayoutInput
+import androidx.compose.ui.text.TextLayoutResult
+import androidx.compose.ui.text.TextMeasurer
+import androidx.compose.ui.text.drawText
+import androidx.compose.ui.text.rememberTextMeasurer
 import androidx.compose.ui.text.style.TextAlign
 import androidx.compose.ui.unit.dp
 import androidx.lifecycle.LifecycleOwner
@@ -42,7 +54,6 @@ import com.google.accompanist.permissions.ExperimentalPermissionsApi
 import com.google.accompanist.permissions.isGranted
 import com.google.accompanist.permissions.rememberPermissionState
 import com.google.accompanist.permissions.shouldShowRationale
-import com.google.mlkit.vision.barcode.BarcodeScanner
 import com.google.mlkit.vision.barcode.BarcodeScannerOptions
 import com.google.mlkit.vision.barcode.BarcodeScanning
 import com.google.mlkit.vision.barcode.common.Barcode
@@ -53,8 +64,10 @@ import kotlinx.coroutines.awaitCancellation
 import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.StateFlow
 import kotlinx.coroutines.launch
-import java.util.concurrent.Executor
+import kotlinx.coroutines.suspendCancellableCoroutine
 import java.util.concurrent.Executors
+import kotlin.coroutines.resume
+import kotlin.math.max
 
 @OptIn(ExperimentalPermissionsApi::class)
 @Composable
@@ -62,7 +75,7 @@ fun CameraScreen(
     modifier: Modifier = Modifier,
     cameraViewModel: CameraViewModel,
 ) {
-    val cameraPermissionState = rememberPermissionState(android.Manifest.permission.CAMERA)
+    val cameraPermissionState = rememberPermissionState(Manifest.permission.CAMERA)
     if (cameraPermissionState.status.isGranted) {
         CameraContent(
             modifier,
@@ -93,7 +106,6 @@ fun CameraScreen(
     }
 }
 
-//TODO Patrick: use Hilt instead: https://developer.android.com/training/dependency-injection
 @Composable
 fun CameraContent(
     modifier: Modifier = Modifier,
@@ -101,9 +113,10 @@ fun CameraContent(
     lifecycleOwner: LifecycleOwner = LocalLifecycleOwner.current
 ) {
     val context = LocalContext.current
-    // Fix: Use remember to prevent creating a new ViewModel and UseCase on every recomposition
-    //val cameraViewModel = remember { CameraViewModel() }
     val surfaceRequest by cameraViewModel.surfaceRequest.collectAsStateWithLifecycle()
+    val detectedBarcode by cameraViewModel.detectedBarcode.collectAsStateWithLifecycle()
+    val imageSize by cameraViewModel.imageSize.collectAsStateWithLifecycle()
+    val imageRotation by cameraViewModel.imageRotation.collectAsStateWithLifecycle()
 
     LaunchedEffect(cameraViewModel, lifecycleOwner) {
         cameraViewModel.bindToCamera(context.applicationContext, lifecycleOwner)
@@ -116,60 +129,136 @@ fun CameraContent(
                 modifier = Modifier.fillMaxSize()
             )
         }
+        
+        // Draw the barcode bounding box overlay
+        BarcodeOverlay(
+            barcode = detectedBarcode,
+            imageSize = imageSize,
+            rotation = imageRotation,
+            modifier = Modifier.fillMaxSize()
+        )
+    }
+}
+
+@Composable
+fun BarcodeOverlay(
+    barcode: Barcode?,
+    imageSize: Size?,
+    rotation: Int,
+    modifier: Modifier = Modifier
+) {
+    if (barcode == null || imageSize == null) return
+
+    val boundingBox = barcode.boundingBox ?: return
+    val textMesurer = rememberTextMeasurer()
+
+    Canvas(modifier = modifier
+        .fillMaxSize()
+        .drawWithCache{
+            val canvasWidth = size.width
+            val canvasHeight = size.height
+            val imgWidth = imageSize.width
+            val imgHeight = imageSize.height
+
+            barcode.cornerPoints
+
+            // 1. Map bounding box to the "upright" coordinate system used by the Viewfinder
+            val fRect = RectF(boundingBox)
+            /*val mappedRect = when (rotation) {
+                90 -> RectF(fRect.left, imgHeight - fRect.top, fRect.right, imgHeight - fRect.bottom)
+                180 -> RectF(imgWidth - fRect.right, imgHeight - fRect.bottom, imgWidth - fRect.left, imgHeight - fRect.top)
+                270 -> RectF(fRect.top, imgWidth - fRect.right, fRect.bottom, imgWidth - fRect.left)
+                else -> fRect
+            }*/
+            val mappedRect = fRect
+
+            // 2. Calculate scaling and offset for "FillCenter" scale type
+            val rotatedWidth = if (rotation % 180 == 90) imgHeight else imgWidth
+            val rotatedHeight = if (rotation % 180 == 90) imgWidth else imgHeight
+
+            val scale = max(canvasWidth / rotatedWidth, canvasHeight / rotatedHeight)
+            val offsetX = (canvasWidth - rotatedWidth * scale) / 2f
+            val offsetY = (canvasHeight - rotatedHeight * scale) / 2f
+
+            val textResult = textMesurer.measure("Hallo: ${barcode.rawValue.toString()}\n" +
+                    "Rotation: ${rotation}\n" +
+                    "BB Top left: ${boundingBox.left}\n" +
+                    "BB Top right: ${boundingBox.right}\n" +
+                    "BPoints: ${barcode.cornerPoints?.joinToString("\n")}\n"
+            )
+
+            onDrawBehind {
+                // 3. Draw the green rectangle
+                drawRect(
+                    color = Color.Green,
+                    topLeft = Offset(mappedRect.left * scale + offsetX, mappedRect.top * scale + offsetY),
+                    size = ComposeSize(mappedRect.width() * scale, mappedRect.height() * scale),
+                    style = Stroke(width = 3.dp.toPx())
+                )
+
+
+                drawText(
+                    textLayoutResult = textResult,
+                    color = Color.Green,
+                    topLeft = Offset(mappedRect.left * scale + offsetX, mappedRect.top * scale + offsetY),
+                )
+            }
+
+        }) {
+
     }
 }
 
 class BarcodeScanner {
-
-    private val options = BarcodeScannerOptions
-        .Builder()
-        .setBarcodeFormats(
-            Barcode.FORMAT_EAN_8,
-            Barcode.FORMAT_EAN_13
-        )
+    private val options = BarcodeScannerOptions.Builder()
+        .setBarcodeFormats(Barcode.FORMAT_EAN_8, Barcode.FORMAT_EAN_13)
         .build()
-
     private val scanner = BarcodeScanning.getClient(options)
 
-    //TODO: Only scan if barcode is visible
+    @androidx.annotation.OptIn(ExperimentalGetImage::class)
+    fun processImage(imageProxy: ImageProxy, onResult: (Barcode?) -> Unit) {
+        val mediaImage = imageProxy.image ?: run {
+            imageProxy.close()
+            return
+        }
+        val image = InputImage.fromMediaImage(mediaImage, imageProxy.imageInfo.rotationDegrees)
+        scanner.process(image)
+            .addOnSuccessListener { barcodes ->
+                onResult(barcodes.maxByOrNull { it.boundingBox?.let { b -> b.width() * b.height() } ?: 0 })
+            }
+            .addOnFailureListener { onResult(null) }
+            .addOnCompleteListener { imageProxy.close() }
+    }
 
     @androidx.annotation.OptIn(ExperimentalGetImage::class)
-    suspend fun scan(imageProxy: ImageProxy) {
-        Log.i("INFO", "Analyzing image")
-        val image = imageProxy.image ?: return
-        val rotationDegrees = imageProxy.imageInfo.rotationDegrees
-
-        imageProxy.use {
-            scanner.process(InputImage.fromMediaImage(image, rotationDegrees))
-                .addOnSuccessListener { barcodes ->
-                    barcodes
-                        .also {
-                            Log.i("INFO", "Barcodes found: ${it.map({ barcode -> barcode.rawValue }).joinToString(", ")}")
-                        }
-                        // The barcode with the biggest bounding box is deemed to be the one focused by the user
-                        .maxWith { barcode1, barcode2 ->
-                        barcode1.boundingBox!!.width() * barcode1.boundingBox!!.height() -
-                                barcode2.boundingBox!!.width() * barcode2.boundingBox!!.height()
-                    }.let { barcode ->
-                        Log.i("INFO", "Barcode found: ${barcode.rawValue}")
-                    }
-                }
+    suspend fun scan(imageProxy: ImageProxy): Barcode? = suspendCancellableCoroutine { cont ->
+        val mediaImage = imageProxy.image ?: run {
+            imageProxy.close()
+            cont.resume(null)
+            return@suspendCancellableCoroutine
         }
-
+        val image = InputImage.fromMediaImage(mediaImage, imageProxy.imageInfo.rotationDegrees)
+        scanner.process(image)
+            .addOnSuccessListener { barcodes ->
+                cont.resume(barcodes.maxByOrNull { it.boundingBox?.let { b -> b.width() * b.height() } ?: 0 })
+            }
+            .addOnFailureListener { cont.resume(null) }
+            .addOnCompleteListener { imageProxy.close() }
     }
 }
 
-class CodeAnalyzer : ImageAnalysis.Analyzer {
-
-    val barcodeScanner = BarcodeScanner()
+class CodeAnalyzer(private val onBarcodeDetected: (Barcode?, Size, Int) -> Unit) : ImageAnalysis.Analyzer {
+    private val scanner = BarcodeScanner()
 
     @androidx.annotation.OptIn(ExperimentalGetImage::class)
     override fun analyze(imageProxy: ImageProxy) {
-        /*Log.i("INFO", "Analyzing image")
-        CoroutineScope(Dispatchers.Default).launch {
-            barcodeScanner.scan(imageProxy)
+        scanner.processImage(imageProxy) { barcode ->
+            onBarcodeDetected(
+                barcode,
+                Size(imageProxy.width, imageProxy.height),
+                imageProxy.imageInfo.rotationDegrees
+            )
         }
-        imageProxy.close()*/
     }
 }
 
@@ -177,28 +266,34 @@ class CameraViewModel : ViewModel() {
     private val _surfaceRequest = MutableStateFlow<SurfaceRequest?>(null)
     val surfaceRequest: StateFlow<SurfaceRequest?> = _surfaceRequest
 
-    private val cameraPreview = Preview
-        .Builder()
-        .build()
-        .apply {
-            setSurfaceProvider {
-                _surfaceRequest.value = it
-            }
-        }
+    private val _detectedBarcode = MutableStateFlow<Barcode?>(null)
+    val detectedBarcode: StateFlow<Barcode?> = _detectedBarcode
 
-    //TODO Patrick: cleanup this class. CameraViewModel should be decoupled from analyzer
-    // so that the we can provide different analyzers
+    private val _imageSize = MutableStateFlow<Size?>(null)
+    val imageSize: StateFlow<Size?> = _imageSize
+
+    private val _imageRotation = MutableStateFlow(0)
+    val imageRotation: StateFlow<Int> = _imageRotation
+
+    private val cameraPreview = Preview.Builder().build().apply {
+        setSurfaceProvider { _surfaceRequest.value = it }
+    }
+
     private val analysisExecutor = Executors.newSingleThreadExecutor()
 
     private val analyzer = ImageAnalysis.Builder()
         .setBackpressureStrategy(STRATEGY_KEEP_ONLY_LATEST)
         .build()
-        .also { it.setAnalyzer(analysisExecutor, CodeAnalyzer()) }
+        .also { it.setAnalyzer(analysisExecutor, CodeAnalyzer(::onBarcodeDetected)) }
 
     private val scanner = BarcodeScanner()
-    val imageCapture = ImageCapture
-        .Builder()
-        .build()
+    val imageCapture = ImageCapture.Builder().build()
+
+    private fun onBarcodeDetected(barcode: Barcode?, size: Size, rotation: Int) {
+        _detectedBarcode.value = barcode
+        _imageSize.value = size
+        _imageRotation.value = rotation
+    }
 
     suspend fun bindToCamera(
         appContext: Context,
@@ -206,18 +301,14 @@ class CameraViewModel : ViewModel() {
         vararg useCases: UseCase
     ) {
         val processCameraProvider = ProcessCameraProvider.awaitInstance(appContext)
-
-
-        // unbindAll before binding to ensure a clean state and avoid TimeoutException
         processCameraProvider.unbindAll()
-
         try {
             processCameraProvider.bindToLifecycle(
                 lifecycleOwner,
                 DEFAULT_BACK_CAMERA,
                 cameraPreview,
                 imageCapture,
-                //analyzer,
+                analyzer,
                 *useCases
             )
             awaitCancellation()
@@ -227,12 +318,10 @@ class CameraViewModel : ViewModel() {
     }
 
     suspend fun takePhoto() {
-        println("INFO: I have taken a photo!!")
         imageCapture.takePicture(
             analysisExecutor,
             object : ImageCapture.OnImageCapturedCallback() {
                 override fun onCaptureSuccess(image: ImageProxy) {
-                    Log.i("INFO", "Image captured")
                     CoroutineScope(Dispatchers.IO).launch {
                         scanner.scan(image)
                     }
@@ -246,7 +335,6 @@ class CameraViewModel : ViewModel() {
 
     override fun onCleared() {
         super.onCleared()
-        // Shut down the executor to prevent memory leaks
         analysisExecutor.shutdown()
     }
 }
