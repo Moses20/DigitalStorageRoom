@@ -1,6 +1,7 @@
 plugins {
     alias(libs.plugins.android.application)
     alias(libs.plugins.kotlin.compose)
+    alias(libs.plugins.ksp)
 }
 
 android {
@@ -66,6 +67,10 @@ dependencies {
     //ML-Kit
     implementation(libs.mlkit.barcode.scanning)
 
+    //Local Database (SQLite)
+    implementation(libs.androidx.room.runtime)
+    implementation(libs.androidx.room.ktx)
+    ksp(libs.androidx.room.compiler)
 
     // Material
     implementation(libs.androidx.compose.material.icons.extended)
