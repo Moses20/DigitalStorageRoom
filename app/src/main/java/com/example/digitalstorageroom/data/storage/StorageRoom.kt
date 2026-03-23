@@ -39,9 +39,16 @@ data class BarcodeItem (
 data class StorageRoom(
     val title: String,
     val type: StorageRoomType,
-
 )
 
+// Coming from the backend
+data class StorageRoomDto(
+    val id: String,
+    val title: String,
+    val type: String,
+)
+
+typealias StorageRoomMap = Map<StorageRoom, List<BarcodeItem>>
 
 
 

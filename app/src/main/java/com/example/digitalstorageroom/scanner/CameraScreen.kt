@@ -3,6 +3,7 @@ package com.example.digitalstorageroom.scanner
 import android.Manifest
 import android.content.Context
 import android.graphics.RectF
+import android.provider.ContactsContract
 import android.util.Log
 import android.util.Size
 import androidx.camera.compose.CameraXViewfinder
@@ -143,6 +144,9 @@ fun BarcodeOverlay(
     imageSize: Size?,
     rotation: Int,
     modifier: Modifier = Modifier
+
+    //TODO: Inject DebugProfile
+    //This can then be used to debug the barcode overlay, as we do not want it, if it is not in debug mode
 ) {
     if (barcode == null || imageSize == null) return
 
