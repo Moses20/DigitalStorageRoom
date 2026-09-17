@@ -5,4 +5,8 @@
 
     <string name="show_less">Show less</string>
     <string name="show_more">Show more</string>
+
+
+    <!-- StorageScreen -->
+    <string name="add_storage_space">Add storage space</string>
 </resources>

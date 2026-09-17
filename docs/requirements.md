@@ -19,6 +19,19 @@ The barcode scanner is used to quickly scan Items. It should be easy (Ease of us
 
 ### Functional Requirements
 
+### [PRIO: Low] Multi-User for a single account (Household)
+- Every user has its own login (own credentials, own profile)
+- Requires: authentication
+
+### [PRIO: Low] Multi-Tenancy
+- Mehrere unabhängige Accounts
+- Every accounts only sees its own scanned product storage spaces and shopping lists (the letter might be a future feature)
+- Requires: authentication
+- 
+### StorageSpaces
+- When type OUTDOOR is used show the temperature of the outside and mark items that might spoil
+  - Also change the color depending on the outside temperature
+
 #### AI
 - Let AI help you cluster and categorize items
 - Let AI generate an image for an item that could not be found by the backend

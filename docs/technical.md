@@ -2,6 +2,13 @@
 
 ## Architecture
 
+### Multi-User innerhalb eines Accoutns
+
+### Multi-Tenant Architektur
+- https://learn.microsoft.com/en-us/azure/architecture/guide/multitenant/approaches/storage-data#approaches-and-patterns-to-consider
+- https://medium.com/@seetharamugn/complete-guide-to-multi-tenant-architecture-d69b24b518d6
+
+
 ### Eventsourcing von Nutzeraktionen
 
 Anstatt die Gesamtzahl gescannter Items zu speichern werden die Aktionen, also das Ein- bzw. Ausscanner 
