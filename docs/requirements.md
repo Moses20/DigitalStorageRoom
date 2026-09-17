@@ -29,8 +29,13 @@ The barcode scanner is used to quickly scan Items. It should be easy (Ease of us
 - Requires: authentication
 - 
 ### StorageSpaces
-- When type OUTDOOR is used show the temperature of the outside and mark items that might spoil
-  - Also change the color depending on the outside temperature
+Have different types of Storage spaces. For example:
+- LIGHTLY_COOLED = fridge, cellar
+- FREEZING = freezer.
+- ROOM_TEMPERATURE = shelf, storage room, etc.
+- OUTDOOR
+  - When type OUTDOOR is used show the temperature of the outside and mark items that might spoil
+    - Also change the color depending on the outside temperature
 
 #### AI
 - Let AI help you cluster and categorize items

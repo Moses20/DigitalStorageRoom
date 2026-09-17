@@ -3,6 +3,9 @@
 ## Architecture
 
 ### Multi-User innerhalb eines Accoutns
+- Prevent one user from overwriting the edits made to the digital storage room.
+  - How could we do it -> Use Operational Transformation (OT) (Used by google docs)
+- Allow edits to storage room by several devices
 
 ### Multi-Tenant Architektur
 - https://learn.microsoft.com/en-us/azure/architecture/guide/multitenant/approaches/storage-data#approaches-and-patterns-to-consider
