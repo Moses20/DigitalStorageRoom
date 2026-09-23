@@ -90,8 +90,7 @@ fun CameraScreen(
         ) {
             val textToShow = if (cameraPermissionState.status.shouldShowRationale) {
                 "Whoops! Looks like we need your camera to work our magic!" +
-                        "Don't worry, we just wanna see your pretty face (and maybe some cats).  " +
-                        "Grant us permission and let's get this party started!"
+                        "Don't worry, we just wanna see the products you want to scan."
             } else {
                 "Hi there! We need your camera to work our magic! ✨\n" +
                         "Grant us permission and let's get this party started! \uD83C\uDF89"
@@ -121,14 +120,18 @@ fun CameraContent(
         cameraViewModel.bindToCamera(context.applicationContext, lifecycleOwner)
     }
 
-    Box(modifier = modifier.fillMaxSize()) {
+
+    Box(
+        contentAlignment = Alignment.Center,
+        modifier = modifier.fillMaxSize(),
+    ) {
         surfaceRequest?.let { request ->
             CameraXViewfinder(
                 surfaceRequest = request,
                 modifier = Modifier.fillMaxSize()
             )
         }
-        
+
         // Draw the barcode bounding box overlay
         BarcodeOverlay(
             barcode = detectedBarcode,
@@ -136,6 +139,11 @@ fun CameraContent(
             rotation = imageRotation,
             modifier = Modifier.fillMaxSize()
         )
+
+        Button(onClick = { System.out.println("TODO!") }) {
+            Text("End scanning session!")
+        }
+
     }
 }
 
@@ -154,59 +162,67 @@ fun BarcodeOverlay(
     val boundingBox = barcode.boundingBox ?: return
     val textMesurer = rememberTextMeasurer()
 
-    Canvas(modifier = modifier
-        .fillMaxSize()
-        .drawWithCache{
-            val canvasWidth = size.width
-            val canvasHeight = size.height
-            val imgWidth = imageSize.width
-            val imgHeight = imageSize.height
+    Canvas(
+        modifier = modifier
+            .fillMaxSize()
+            .drawWithCache {
+                val canvasWidth = size.width
+                val canvasHeight = size.height
+                val imgWidth = imageSize.width
+                val imgHeight = imageSize.height
 
-            barcode.cornerPoints
+                barcode.cornerPoints
 
-            // 1. Map bounding box to the "upright" coordinate system used by the Viewfinder
-            val fRect = RectF(boundingBox)
-            /*val mappedRect = when (rotation) {
-                90 -> RectF(fRect.left, imgHeight - fRect.top, fRect.right, imgHeight - fRect.bottom)
-                180 -> RectF(imgWidth - fRect.right, imgHeight - fRect.bottom, imgWidth - fRect.left, imgHeight - fRect.top)
-                270 -> RectF(fRect.top, imgWidth - fRect.right, fRect.bottom, imgWidth - fRect.left)
-                else -> fRect
-            }*/
-            val mappedRect = fRect
+                // 1. Map bounding box to the "upright" coordinate system used by the Viewfinder
+                val fRect = RectF(boundingBox)
+                /*val mappedRect = when (rotation) {
+                    90 -> RectF(fRect.left, imgHeight - fRect.top, fRect.right, imgHeight - fRect.bottom)
+                    180 -> RectF(imgWidth - fRect.right, imgHeight - fRect.bottom, imgWidth - fRect.left, imgHeight - fRect.top)
+                    270 -> RectF(fRect.top, imgWidth - fRect.right, fRect.bottom, imgWidth - fRect.left)
+                    else -> fRect
+                }*/
+                val mappedRect = fRect
 
-            // 2. Calculate scaling and offset for "FillCenter" scale type
-            val rotatedWidth = if (rotation % 180 == 90) imgHeight else imgWidth
-            val rotatedHeight = if (rotation % 180 == 90) imgWidth else imgHeight
+                // 2. Calculate scaling and offset for "FillCenter" scale type
+                val rotatedWidth = if (rotation % 180 == 90) imgHeight else imgWidth
+                val rotatedHeight = if (rotation % 180 == 90) imgWidth else imgHeight
 
-            val scale = max(canvasWidth / rotatedWidth, canvasHeight / rotatedHeight)
-            val offsetX = (canvasWidth - rotatedWidth * scale) / 2f
-            val offsetY = (canvasHeight - rotatedHeight * scale) / 2f
+                val scale = max(canvasWidth / rotatedWidth, canvasHeight / rotatedHeight)
+                val offsetX = (canvasWidth - rotatedWidth * scale) / 2f
+                val offsetY = (canvasHeight - rotatedHeight * scale) / 2f
 
-            val textResult = textMesurer.measure("Hallo: ${barcode.rawValue.toString()}\n" +
-                    "Rotation: ${rotation}\n" +
-                    "BB Top left: ${boundingBox.left}\n" +
-                    "BB Top right: ${boundingBox.right}\n" +
-                    "BPoints: ${barcode.cornerPoints?.joinToString("\n")}\n"
-            )
-
-            onDrawBehind {
-                // 3. Draw the green rectangle
-                drawRect(
-                    color = Color.Green,
-                    topLeft = Offset(mappedRect.left * scale + offsetX, mappedRect.top * scale + offsetY),
-                    size = ComposeSize(mappedRect.width() * scale, mappedRect.height() * scale),
-                    style = Stroke(width = 3.dp.toPx())
+                val textResult = textMesurer.measure(
+                    "Hallo: ${barcode.rawValue.toString()}\n" +
+                            "Rotation: ${rotation}\n" +
+                            "BB Top left: ${boundingBox.left}\n" +
+                            "BB Top right: ${boundingBox.right}\n" +
+                            "BPoints: ${barcode.cornerPoints?.joinToString("\n")}\n"
                 )
 
+                onDrawBehind {
+                    // 3. Draw the green rectangle
+                    drawRect(
+                        color = Color.Green,
+                        topLeft = Offset(
+                            mappedRect.left * scale + offsetX,
+                            mappedRect.top * scale + offsetY
+                        ),
+                        size = ComposeSize(mappedRect.width() * scale, mappedRect.height() * scale),
+                        style = Stroke(width = 3.dp.toPx())
+                    )
 
-                drawText(
-                    textLayoutResult = textResult,
-                    color = Color.Green,
-                    topLeft = Offset(mappedRect.left * scale + offsetX, mappedRect.top * scale + offsetY),
-                )
-            }
 
-        }) {
+                    drawText(
+                        textLayoutResult = textResult,
+                        color = Color.Green,
+                        topLeft = Offset(
+                            mappedRect.left * scale + offsetX,
+                            mappedRect.top * scale + offsetY
+                        ),
+                    )
+                }
+
+            }) {
 
     }
 }
@@ -226,7 +242,9 @@ class BarcodeScanner {
         val image = InputImage.fromMediaImage(mediaImage, imageProxy.imageInfo.rotationDegrees)
         scanner.process(image)
             .addOnSuccessListener { barcodes ->
-                onResult(barcodes.maxByOrNull { it.boundingBox?.let { b -> b.width() * b.height() } ?: 0 })
+                onResult(barcodes.maxByOrNull {
+                    it.boundingBox?.let { b -> b.width() * b.height() } ?: 0
+                })
             }
             .addOnFailureListener { onResult(null) }
             .addOnCompleteListener { imageProxy.close() }
@@ -243,7 +261,9 @@ class BarcodeScanner {
         scanner.process(image)
             .addOnSuccessListener { barcodes ->
                 // The barcode with the biggest bounding box is deemed to be the one focused by the user
-                cont.resume(barcodes.maxByOrNull { it.boundingBox?.let { b -> b.width() * b.height() } ?: 0 })
+                cont.resume(barcodes.maxByOrNull {
+                    it.boundingBox?.let { b -> b.width() * b.height() } ?: 0
+                })
             }
             .addOnFailureListener {
                 cont.resume(null)
@@ -252,7 +272,8 @@ class BarcodeScanner {
     }
 }
 
-class CodeAnalyzer(private val onBarcodeDetected: (Barcode?, Size, Int) -> Unit) : ImageAnalysis.Analyzer {
+class CodeAnalyzer(private val onBarcodeDetected: (Barcode?, Size, Int) -> Unit) :
+    ImageAnalysis.Analyzer {
     private val scanner = BarcodeScanner()
 
     @androidx.annotation.OptIn(ExperimentalGetImage::class)
@@ -268,15 +289,16 @@ class CodeAnalyzer(private val onBarcodeDetected: (Barcode?, Size, Int) -> Unit)
 }
 
 class CameraViewModel : ViewModel() {
+
+
     private val _surfaceRequest = MutableStateFlow<SurfaceRequest?>(null)
     val surfaceRequest: StateFlow<SurfaceRequest?> = _surfaceRequest
 
+    // The following variables are used for the BarcodeOverlay
     private val _detectedBarcode = MutableStateFlow<Barcode?>(null)
     val detectedBarcode: StateFlow<Barcode?> = _detectedBarcode
-
     private val _imageSize = MutableStateFlow<Size?>(null)
     val imageSize: StateFlow<Size?> = _imageSize
-
     private val _imageRotation = MutableStateFlow(0)
     val imageRotation: StateFlow<Int> = _imageRotation
 
