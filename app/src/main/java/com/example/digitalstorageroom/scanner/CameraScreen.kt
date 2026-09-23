@@ -3,7 +3,6 @@ package com.example.digitalstorageroom.scanner
 import android.Manifest
 import android.content.Context
 import android.graphics.RectF
-import android.provider.ContactsContract
 import android.util.Log
 import android.util.Size
 import androidx.camera.compose.CameraXViewfinder
@@ -25,9 +24,12 @@ import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.Spacer
 import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.height
+import androidx.compose.foundation.layout.padding
+import androidx.compose.foundation.layout.statusBarsPadding
 import androidx.compose.foundation.layout.widthIn
 import androidx.compose.foundation.layout.wrapContentSize
 import androidx.compose.material3.Button
+import androidx.compose.material3.FloatingActionButton
 import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.LaunchedEffect
@@ -85,7 +87,8 @@ fun CameraScreen(
             modifier = modifier
                 .fillMaxSize()
                 .wrapContentSize()
-                .widthIn(max = 480.dp),
+                .widthIn(max = 480.dp)
+            ,
             horizontalAlignment = Alignment.CenterHorizontally
         ) {
             val textToShow = if (cameraPermissionState.status.shouldShowRationale) {
@@ -122,8 +125,11 @@ fun CameraContent(
 
 
     Box(
-        contentAlignment = Alignment.Center,
-        modifier = modifier.fillMaxSize(),
+        contentAlignment = Alignment.BottomStart,
+        modifier = Modifier.padding()
+            //Uncomment if we want the video screen to clip over the statusBars
+            .statusBarsPadding()
+            .fillMaxSize(),
     ) {
         surfaceRequest?.let { request ->
             CameraXViewfinder(
@@ -140,8 +146,25 @@ fun CameraContent(
             modifier = Modifier.fillMaxSize()
         )
 
-        Button(onClick = { System.out.println("TODO!") }) {
-            Text("End scanning session!")
+        Button(
+            modifier = modifier,
+            onClick = { System.out.println("TODO!") },
+
+        ) {
+            Text("End scanning!")
+        }
+
+        FloatingActionButton(
+            onClick = {println("Click yo")},
+            modifier = modifier
+                .align(Alignment.BottomEnd)
+                .padding(16.dp)
+            ,
+        ) {
+            Text(
+                modifier = Modifier.padding(2.dp),
+                text = "End scanning!"
+            )
         }
 
     }

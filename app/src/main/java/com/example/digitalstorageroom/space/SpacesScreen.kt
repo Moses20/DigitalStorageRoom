@@ -4,11 +4,18 @@ import android.util.Log
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.Column
+import androidx.compose.foundation.layout.PaddingValues
 import androidx.compose.foundation.layout.Row
+import androidx.compose.foundation.layout.Spacer
+import androidx.compose.foundation.layout.WindowInsets
+import androidx.compose.foundation.layout.asPaddingValues
 import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.height
+import androidx.compose.foundation.layout.navigationBars
+import androidx.compose.foundation.layout.navigationBarsPadding
 import androidx.compose.foundation.layout.padding
+import androidx.compose.foundation.layout.statusBarsPadding
 import androidx.compose.foundation.lazy.LazyColumn
 import androidx.compose.foundation.lazy.items
 import androidx.compose.material.icons.Icons
@@ -49,14 +56,18 @@ fun SpacesScreen(
         println("TODO: you tried to add a new space!")
     }
 
-    Box(modifier = modifier) {
+    Box(modifier = Modifier
+        //Make the SpaceContent clip the nav bar
+        .statusBarsPadding()
+        .fillMaxSize()) {
         SpaceContent(
             onSpaceClick = onSpaceClick,
-            spaces = hardcodedStorageSpaces()
+            storageSpaces = hardcodedStorageSpaces()
         )
+        //Spacer(modifier.padding.navigationBarsPadding())
         FloatingActionButton(
             onClick = onAddSpaceClick,
-            modifier = Modifier
+            modifier = modifier
                 .align(Alignment.BottomEnd)
                 .padding(16.dp),
 
@@ -71,14 +82,20 @@ fun SpacesScreen(
 fun SpaceContent(
     modifier: Modifier = Modifier,
     onSpaceClick: (StorageSpace) -> Unit,
-    spaces: List<StorageSpace>,
+    storageSpaces: List<StorageSpace>,
 ) {
+    val navBarHeight = WindowInsets.navigationBars.asPaddingValues().calculateBottomPadding()
+
     LazyColumn(
-        modifier = modifier.fillMaxSize()
+        modifier = modifier.fillMaxSize(),
+        contentPadding = PaddingValues(
+            top = 8.dp,
+            bottom = navBarHeight + 80.dp // Navigation bar inset + space for FAB
+        )
     ) {
-        items(spaces) { space ->
+        items(storageSpaces) { storageSpace ->
             SpaceCard(
-                space = space,
+                space = storageSpace,
                 onSpaceClick = onSpaceClick
             )
         }
@@ -131,7 +148,7 @@ private fun SpaceContentPreview() {
     ) {
         SpaceContent(
             onSpaceClick = { Log.d("SpaceCard", "Space clicked") },
-            spaces = hardcodedStorageSpaces()
+            storageSpaces = hardcodedStorageSpaces()
         )
 
     }

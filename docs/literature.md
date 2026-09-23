@@ -12,3 +12,9 @@
 
 ### Android flow
 - [Kotlin flows on Android](https://developer.android.com/kotlin/flow)
+
+### Nice to know
+- [Lazily load data with lists and Paging](https://developer.android.com/develop/ui/compose/quick-guides/content/lazily-load-list)
+
+### Guides
+- [Display interactive components](https://developer.android.com/develop/ui/compose/quick-guides/collections/display-interactive-components)

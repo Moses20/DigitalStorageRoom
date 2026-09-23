@@ -110,18 +110,18 @@ class MainActivity : ComponentActivity() {
                         routes = mapOf(
                             Route.CAMERA to {
                                 CameraScreen(
-                                    modifier = Modifier.padding(top = contentPadding.calculateTopPadding()),
+                                    modifier = Modifier.padding(contentPadding),
                                     cameraViewModel = cameraViewModel
                                 )
                             },
                             Route.STORAGE to {
                                 SpacesScreen(
-                                    modifier = Modifier.padding(contentPadding)
+                                    modifier = Modifier.padding(contentPadding),
                                 )
                             },
                             Route.EDIT to {
                                 ItemsScreen(
-                                    modifier = Modifier.padding(contentPadding)
+                                    modifier = Modifier.padding(contentPadding),
                                 )
                             }
                         )
