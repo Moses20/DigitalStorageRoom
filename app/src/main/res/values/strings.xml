@@ -9,4 +9,5 @@
 
     <!-- StorageScreen -->
     <string name="add_storage_space">Add storage space</string>
+    <string name="title_activity_add_space_screen">AddSpaceScreen</string>
 </resources>
