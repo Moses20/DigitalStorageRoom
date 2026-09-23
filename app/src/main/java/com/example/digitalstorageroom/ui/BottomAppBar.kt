@@ -48,6 +48,7 @@ import androidx.navigation.compose.NavHost
 import androidx.navigation.compose.composable
 import androidx.navigation.compose.rememberNavController
 import com.example.digitalstorageroom.item.ItemsScreen
+import com.example.digitalstorageroom.space.SpacesScreen
 import com.example.digitalstorageroom.ui.icons.Barcode
 import com.example.digitalstorageroom.ui.icons.HomeStorage
 import com.example.digitalstorageroom.ui.icons.Material
@@ -118,22 +119,13 @@ fun AppNavHost(
     modifier: Modifier = Modifier
 ) {
     NavHost(
-        navController,
-        startDestination = startDestination.route.name
+        navController =  navController,
+        startDestination = startDestination.route.name,
+        modifier = modifier,
     ) {
         Route.entries.forEach { route ->
             composable(route.name) {
-                when (route) {
-                    Route.STORAGE -> SongsScreen()
-                    //Destination.CHECK -> AlbumScreen()
-                    Route.EDIT -> ItemsScreen()
-                    Route.CAMERA -> routes[Route.CAMERA]?.invoke()
-                    else -> {
-                        Log.e("ERROR", "Route not found: $route")
-                    }
-                }
-                //TODO: When can be replaced by
-                // routes[route]?.invoke()
+                routes[route]?.invoke() ?: Log.e("ERROR", "Route not found: $route")
             }
         }
     }

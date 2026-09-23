@@ -27,8 +27,10 @@ import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
 import androidx.navigation.compose.rememberNavController
+import com.example.digitalstorageroom.item.ItemsScreen
 import com.example.digitalstorageroom.scanner.CameraScreen
 import com.example.digitalstorageroom.scanner.CameraViewModel
+import com.example.digitalstorageroom.space.SpacesScreen
 import com.example.digitalstorageroom.ui.AppNavHost
 import com.example.digitalstorageroom.ui.BottomAppBar
 import com.example.digitalstorageroom.ui.DestinationInit
@@ -103,9 +105,25 @@ class MainActivity : ComponentActivity() {
                     AppNavHost(
                         navController,
                         startDestination,
-                        modifier = Modifier.padding(contentPadding),
+                        // Uncomment to remove selective padding i.e. pass specific padding for each screen
+                        //modifier = Modifier.padding(contentPadding),
                         routes = mapOf(
-                            Route.CAMERA to { CameraScreen(cameraViewModel = cameraViewModel) }
+                            Route.CAMERA to {
+                                CameraScreen(
+                                    modifier = Modifier.padding(top = contentPadding.calculateTopPadding()),
+                                    cameraViewModel = cameraViewModel
+                                )
+                            },
+                            Route.STORAGE to {
+                                SpacesScreen(
+                                    modifier = Modifier.padding(contentPadding)
+                                )
+                            },
+                            Route.EDIT to {
+                                ItemsScreen(
+                                    modifier = Modifier.padding(contentPadding)
+                                )
+                            }
                         )
                     )
 
