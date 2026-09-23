@@ -1,11 +1,10 @@
 package com.example.digitalstorageroom.space
 
 import android.util.Log
-import androidx.compose.foundation.background
 import androidx.compose.foundation.layout.Arrangement
+import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.Row
-import androidx.compose.foundation.layout.Spacer
 import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.height
@@ -17,9 +16,9 @@ import androidx.compose.material.icons.filled.Add
 import androidx.compose.material.icons.filled.Store
 import androidx.compose.material3.Card
 import androidx.compose.material3.CardDefaults
+import androidx.compose.material3.FloatingActionButton
 import androidx.compose.material3.Icon
 import androidx.compose.material3.MaterialTheme
-import androidx.compose.material3.SmallFloatingActionButton
 import androidx.compose.material3.Surface
 import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
@@ -37,19 +36,33 @@ import com.example.digitalstorageroom.space.data.local.StorageSpaceType
 @Composable
 fun SpacesScreen(
     modifier: Modifier = Modifier,
-    onSpaceClick: (StorageSpace) -> Unit,
-    onAddSpaceClick: () -> Unit,
+   //onSpaceClick: (StorageSpace) -> Unit,
+    // onAddSpaceClick: () -> Unit,
     //viewModel: SpacesViewModel = hiltViewModel()
 ) {
-    Surface() {
-        SmallFloatingActionButton(onClick = onAddSpaceClick) {
-            Icon(Icons.Filled.Add, contentDescription = stringResource(R.string.add_storage_space))
-        }
-        Spacer(modifier = modifier)
+
+    val onSpaceClick: (StorageSpace) -> Unit = {
+        println("You clicked on space \"${it.title}\"")
+    }
+
+    val onAddSpaceClick: () -> Unit = {
+        println("TODO: you tried to add a new space!")
+    }
+
+    Box(modifier = modifier) {
         SpaceContent(
             onSpaceClick = onSpaceClick,
-            spaces = emptyList()
+            spaces = hardcodedStorageSpaces()
         )
+        FloatingActionButton(
+            onClick = onAddSpaceClick,
+            modifier = Modifier
+                .align(Alignment.BottomEnd)
+                .padding(16.dp),
+
+        ) {
+            Icon(Icons.Filled.Add, contentDescription = stringResource(R.string.add_storage_space))
+        }
     }
 }
 
@@ -72,6 +85,44 @@ fun SpaceContent(
     }
 }
 
+fun hardcodedStorageSpaces() : List<StorageSpace> = listOf(
+    StorageSpace(
+        "1",
+        "Refrigerator kitchen",
+        StorageSpaceType.REFRIGERATOR
+    ),
+    StorageSpace(
+        "2",
+        "Freezer kitchen",
+        StorageSpaceType.FREEZER
+    ),
+    StorageSpace(
+        "3",
+        "Refrigerator cellar",
+        StorageSpaceType.REFRIGERATOR
+    ),
+    StorageSpace(
+        "4",
+        "Storage cellar",
+        StorageSpaceType.NORMAL
+    ),
+    StorageSpace(
+        "5",
+        "Storage cellar",
+        StorageSpaceType.NORMAL
+    ),
+    StorageSpace(
+        "6",
+        "Storage cellar",
+        StorageSpaceType.NORMAL
+    ),
+    StorageSpace(
+        "7",
+        "Storage cellar",
+        StorageSpaceType.NORMAL
+    ),
+)
+
 @Preview
 @Composable
 private fun SpaceContentPreview() {
@@ -80,28 +131,7 @@ private fun SpaceContentPreview() {
     ) {
         SpaceContent(
             onSpaceClick = { Log.d("SpaceCard", "Space clicked") },
-            spaces = listOf(
-                StorageSpace(
-                    "1",
-                    "Refrigerator kitchen",
-                    StorageSpaceType.REFRIGERATOR
-                ),
-                StorageSpace(
-                    "2",
-                    "Freezer kitchen",
-                    StorageSpaceType.FREEZER
-                ),
-                StorageSpace(
-                    "3",
-                    "Refrigerator cellar",
-                    StorageSpaceType.REFRIGERATOR
-                ),
-                StorageSpace(
-                    "4",
-                    "Storage cellar",
-                    StorageSpaceType.NORMAL
-                ),
-            )
+            spaces = hardcodedStorageSpaces()
         )
 
     }
@@ -123,11 +153,13 @@ fun SpaceCard(
         )
 
     Card(
-        modifier = Modifier.fillMaxWidth()
+        modifier = Modifier
+            .fillMaxWidth()
             .padding(5.dp),
         colors = CardDefaults.cardColors().copy(
             containerColor = color
-        )
+        ),
+        onClick = { onSpaceClick(space) }
 
     ) {
         Column(
@@ -145,7 +177,8 @@ fun SpaceCard(
                     style = MaterialTheme.typography.headlineMedium.copy(
                         fontWeight = FontWeight.Bold
                     ),
-                    text = space.title
+                    text = space.title,
+                    color = Color.Black
                 )
                 //Spacer(modifier = Modifier.)
                 Icon(Icons.Filled.Store, contentDescription = space.title)
