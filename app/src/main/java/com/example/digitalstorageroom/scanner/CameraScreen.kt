@@ -67,6 +67,7 @@ import kotlin.coroutines.resume
 import kotlin.math.max
 import androidx.compose.ui.geometry.Size as ComposeSize
 
+//TODO: Move classes into their own files
 @OptIn(ExperimentalPermissionsApi::class)
 @Composable
 fun CameraScreen(
