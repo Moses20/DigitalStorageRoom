@@ -18,3 +18,6 @@
 
 ### Guides
 - [Display interactive components](https://developer.android.com/develop/ui/compose/quick-guides/collections/display-interactive-components)
+
+### AI
+- [Android Agent Skills](https://github.com/android/skills/tree/main)
