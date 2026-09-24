@@ -18,12 +18,19 @@ This is a summary of the hole idea, to be used to feed the agent.
   - 
 - Frontend:
   - Scan bar codes to either add or remove StoredItems from a specific storage room
+    - Scanning Process:
+      - Open the Camera. Here you can choose the storage space you want to scan items. Their is an option two either add items or remove items when scanning.
   - ItemRepresentations not existing in the backend can be created by the user.
   - StoredItems have a link to the ItemRepresentation so the user can get more info about the products currently stored
   - Interface to manage storage spaces (Add or remove)
   - One Digital Storage Room Account can be used by many users or devices
     - Each device should be updated (through events) on changes made to the state of each of the storage spaces
   - The App should be offline first. If i go down the cellar where a viable connection can not be guaranteed, i want the scanned objects / items to be transmitted to the backend as soon as im reconnected to the internet.
+  - Storage Space:
+    - Each Space has a list of items. These items can be added or removed via a plus or minus button. The changes need to be saved before they are persisted.
+    - Items can be searched and ordered by date, name, amount
+    - The amount of items can never be 0
+    - 
 
 
 - Lets talk about the backend. It could be more than one if we decide it is needed. 
