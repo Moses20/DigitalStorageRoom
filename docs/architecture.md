@@ -1,6 +1,6 @@
 # Digital Storage Room – Architektur
 
-> Stand: 27.09.2026 · Version 0.2 · Struktur angelehnt an arc42 (verschlankt)
+> Stand: 27.09.2026 · Version 0.3 · Struktur angelehnt an arc42 (verschlankt)
 > Grundlage: Feature-Katalog v0.3, User Stories MVP, Bildschirme & Abläufe
 > Verweise: Features (z. B. EK-2), Entscheidungen (E-x), Designentscheidungen (D-x), Architekturentscheidungen (ADR-x)
 >
@@ -55,7 +55,7 @@ flowchart LR
     B --> PG[(PostgreSQL)]
     C -. definiert .- B
     C -. generiert Client .- A1
-    B -. später .-> OFF[(Open Food Facts)]
+B -. später .-> OFF[(Open Food Facts)]
 ```
 
 Alle Teilnehmer sprechen gegen **einen sprachneutralen API-Vertrag** (ADR-9). Wie das Backend implementiert ist, ist für die Clients unsichtbar.
@@ -113,16 +113,16 @@ dsr-firmware/                   ← eigenes Repo (ESP32-Scanner + Host)
 ```mermaid
 flowchart TD
     UI[UI · Compose-Screens S0–S9] --> VM[ViewModels · @HiltViewModel<br/>StateFlow pro Screen]
-    VM --> UC[Use Cases<br/>ScanItem, ConsumeItem, …]
-    UC --> R[[Repository-Interfaces]]
-    UC --> P[Projektionen<br/>Bestand, Einkaufsliste]
-    R --> L[Local: Room-KMP]
-    R -. später .-> S[Remote: generierter Client + Outbox]
-    VM --> SC[[BarcodeScanner-Interface]]
-    SC --> MK[Android: CameraX + ML Kit]
-    HM[Hilt-Module · androidApp] -. verdrahtet .-> UC
-    HM -. verdrahtet .-> L
-    HM -. verdrahtet .-> MK
+VM --> UC[Use Cases<br/>ScanItem, ConsumeItem, …]
+UC --> R[[Repository-Interfaces]]
+UC --> P[Projektionen<br/>Bestand, Einkaufsliste]
+R --> L[Local: Room-KMP]
+R -. später .-> S[Remote: generierter Client + Outbox]
+VM --> SC[[BarcodeScanner-Interface]]
+SC --> MK[Android: CameraX + ML Kit]
+HM[Hilt-Module · androidApp] -. verdrahtet .-> UC
+HM -. verdrahtet .-> L
+HM -. verdrahtet .-> MK
 ```
 
 | Baustein | Verantwortung |
